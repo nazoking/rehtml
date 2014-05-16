@@ -1,5 +1,10 @@
 # REHTML
 
+[![Build Status](https://travis-ci.org/nazoking/rehtml.png?branch=master)](https://travis-ci.org/nazoking/rehtml)
+[![Coverage Status](https://coveralls.io/repos/nazoking/rehtml/badge.png)](https://coveralls.io/r/nazoking/rehtml)
+[![Code Climate](https://codeclimate.com/github/nazoking/rehtml.png)](https://codeclimate.com/github/nazoking/rehtml)
+[![Dependency Status](https://gemnasium.com/nazoking/rehtml.png)](https://gemnasium.com/nazoking/rehtml)
+
 Pure Ruby html parser.
 
 This library parse html and build rexml document.
