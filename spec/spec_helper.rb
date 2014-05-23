@@ -4,9 +4,6 @@ require 'rehtml'
 require 'coveralls'
 Coveralls.wear!
 
-RSpec::Matchers.define :my_matcher do |expected|
-  match do |actual|
-   true
-  end
-end
+require 'rspec/expectations'
+
 

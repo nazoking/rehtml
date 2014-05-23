@@ -25,16 +25,15 @@ describe REHTML::Tokenizer do
       @tokenizer =  REHTML::Tokenizer.new(%[<a name="be evil" type='checkbox' value=yes disabled>])
     end
     describe "first" do
-      subject(:first) { @tokenizer.next.to_rexml }
-      it{ should be_a(REXML::Element) }
+      subject(:first) { @tokenizer.next }
+      its(:raw){ should eq(%[<a name="be evil" type='checkbox' value=yes disabled>]) }
+      it{ should be_a(REHTML::Tag) }
       its(:name){ should eq("a") }
-      describe "attribute" do
-        subject { @tokenizer.next.attributes }
-        its(["type"]){ should eq("checkbox") }
-        its(["name"]){ should eq("be evil") }
-        its(["value"]){ should eq("yes") }
-        its(["disabled"]){ should eq("") }
-      end
+      its(:attributes){ should eq({
+        "type"=>"checkbox",
+        "name"=>"be evil",
+        "value"=>"yes",
+        "disabled"=>""}) }
     end
     describe "second" do
       subject{ @tokenizer.next; @tokenizer.next }
@@ -52,18 +51,21 @@ describe REHTML::Tokenizer do
       @token6 = @tokenizer.next
     end
     context "token1" do
-      subject{ @token1.to_rexml }
-      it{ should be_a(REXML::Text) }
+      subject{ @token1 }
+      its(:raw){ should eq("a") }
+      it{ should be_a(REHTML::Text) }
       its(:value){ should eq("a") }
     end
     context "token2" do
-      subject{ @token2.to_rexml }
-      it{ should be_a(REXML::Element) }
+      subject{ @token2 }
+      its(:raw){ should eq("<b>") }
+      it{ should be_a(REHTML::Tag) }
       its(:name){ should eq("b") }
+      its("attributes.empty?"){ should be_true }
     end
     context "token3" do
-      subject{ @token3.to_rexml }
-      it{ should be_a(REXML::Text) }
+      subject{ @token3 }
+      it{ should be_a(REHTML::Text) }
       its(:value){ should eq("c") }
     end
     context "token4" do
@@ -72,9 +74,13 @@ describe REHTML::Tokenizer do
       its(:name){ should eq("b") }
     end
     context "token5" do
-      subject{ @token5.to_rexml }
-      it{ should be_a(REXML::Text) }
+      subject{ @token5 }
+      it{ should be_a(REHTML::Text) }
       its(:value){ should eq("d") }
+    end
+    context "token6" do
+      subject{ @token6 }
+      it{ should be_nil }
     end
   end
   describe %[<?xml version="1.0"?><?php hoge?><? huga?>] do
@@ -85,21 +91,21 @@ describe REHTML::Tokenizer do
       @token3 = @tokenizer.next
     end
     context "token1" do
-      subject{ @token1.to_rexml }
-      it{ should be_a(REXML::XMLDecl) }
-      its(:version){ should eq("1.0") }
+      subject{ @token1 }
+      it{ should be_a(REHTML::Instruction) }
+      its(:is_xml_decl?){ should be_true }
     end
     context "token2" do
-      subject{ @token2.to_rexml }
-      it{ should be_a(REXML::Instruction) }
+      subject{ @token2 }
+      it{ should be_a(REHTML::Instruction) }
       its(:target){ should eq("php") }
-      its(:content){ should eq("hoge") }
+      its(:content){ should eq(" hoge") }
     end
     context "token3" do
-      subject{ @token3.to_rexml }
-      it{ should be_a(REXML::Instruction) }
+      subject{ @token3 }
+      it{ should be_a(REHTML::Instruction) }
       its(:target){ should eq("") }
-      its(:content){ should eq("huga") }
+      its(:content){ should eq(" huga") }
     end
   end
   describe %{<!-- comment --><![CDATA[ cdata ]]>} do
@@ -109,14 +115,55 @@ describe REHTML::Tokenizer do
       @token2 = @tokenizer.next
     end
     context "token1" do
-      subject{ @token1.to_rexml }
-      it{ should be_a(REXML::Comment) }
+      subject{ @token1 }
+      it{ should be_a(REHTML::Comment) }
       its(:string){ should eq(" comment ") }
     end
     context "token2" do
-      subject{ @token2.to_rexml }
-      it{ should be_a(REXML::CData) }
+      subject{ @token2 }
+      it{ should be_a(REHTML::CData) }
       its(:value){ should eq(" cdata ") }
     end
+  end
+  describe %{unclosed comment <!-- comment } do
+    before(:each) do
+      @t = REHTML::Tokenizer.new(%{<!-- comment })
+      @t1 = @t.next
+      @t2 = @t.next
+    end
+    context "token1" do
+      subject{ @t1 }
+      it{ should be_a(REHTML::Comment) }
+      its(:string){ should eq(" comment ") }
+    end
+    it("token2 should be nil"){ @t2.should be_nil }
+  end
+  describe %{unclosed tag <A } do
+    before(:each) do
+      @t = REHTML::Tokenizer.new(%{<A })
+      @t1 = @t.next
+      @t2 = @t.next
+    end
+    context "token1" do
+      subject{ @t1 }
+      it{ should be_a(REHTML::Tag) }
+      its(:name){ should eq("a") }
+      its(:attributes){ should be_empty }
+    end
+    it("token2 should be nil"){ @t2.should be_nil }
+  end
+  describe %{bad <A =A=B ATTR x=">" hoge = ' huge} do
+    before(:each) do
+      @t = REHTML::Tokenizer.new(%{<A =A=B ATTR x=">" A =A=B hoge = ' huge})
+      @t1 = @t.next
+      @t2 = @t.next
+    end
+    context "token1" do
+      subject{ @t1 }
+      it{ should be_a(REHTML::Tag) }
+      its(:name){ should eq("a") }
+      its(:attributes){ should eq({"attr"=>"", "hoge"=>" huge", "a"=>"A=B","x"=>">"}) }
+    end
+    it("token2 should be nil"){ @t2.should be_nil }
   end
 end
