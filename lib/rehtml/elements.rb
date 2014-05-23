@@ -2,7 +2,7 @@ module REHTML
   class Node
   end
   class Text < Node
-    attr :value
+    attr_reader :value
     def initialize(value)
       @value = value
     end
@@ -10,7 +10,7 @@ module REHTML
   class CData < Text
   end
   class Tag < Node
-    attr :name, :attributes
+    attr_reader :name, :attributes
     def initialize(name,attributes,empty)
       @name = name
       @attributes = attributes
@@ -23,7 +23,7 @@ module REHTML
   class EndTag < Tag
   end
   class Instruction < Node
-    attr :target, :content
+    attr_reader :target, :content
     def initialize(target,content)
       @target = target
       @content = content
@@ -33,7 +33,7 @@ module REHTML
     end
   end
   class Comment < Node
-    attr :string
+    attr_reader :string
     def initialize(string)
       @string = string
     end
