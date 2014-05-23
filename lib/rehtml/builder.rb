@@ -15,7 +15,7 @@ module REHTML
     def to_rexml(node)
       case node
       when Text
-        REXML::Text.new(node.value)
+        REXML::Text.new(node.value, true)
       when CData
         REXML::CData.new(node.value)
       when Instruction
@@ -32,7 +32,7 @@ module REHTML
         REXML::Comment.new(node.string)
       when Tag
         if cdata_tag?(@pos.name)
-          REXML::Text.new(node.raw)
+          REXML::Text.new(node.raw, true)
         else
           xml = REXML::Element.new
           xml.name = node.name

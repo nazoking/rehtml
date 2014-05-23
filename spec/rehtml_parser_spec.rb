@@ -30,7 +30,7 @@ describe ReHTML(%[<title>html</title><a>a</a>]) do
   its("doc.xml_decl.writethis"){ should be_false } 
 end
 describe ReHTML(%[  <?xml version="1.0" ?><html><a>a</a>]) do
-  its(:to_rexml){ should eq(%[<?xml version='1.0'?> <html><a>a</a></html>]) }
+  its(:to_rexml){ should eq(%[<?xml version='1.0'?>  <html><a>a</a></html>]) }
   its("doc.xml_decl.writethis"){ should be_true } 
 end
 describe ReHTML(%[<html><a />]) do
