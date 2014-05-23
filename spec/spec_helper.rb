@@ -1,8 +1,11 @@
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'rubygems'
 require 'rehtml'
-require 'coveralls'
-Coveralls.wear!
+begin
+  require 'coveralls'
+  Coveralls.wear!
+rescue LoadError
+end
 
 require 'rspec/expectations'
 
