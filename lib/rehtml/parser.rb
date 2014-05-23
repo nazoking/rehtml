@@ -2,9 +2,10 @@ require 'rehtml/tokenizer'
 require 'rehtml/builder'
 
 module REHTML
-  def self.to_rexml(str)
+  # convert html to REXML::Document
+  def self.to_rexml(html)
     builder = REXMLBuilder.new
-    builder.parse(Tokenizer.new(str))
+    builder.parse(Tokenizer.new(html))
     builder.doc
   end
 end
