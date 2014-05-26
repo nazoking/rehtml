@@ -23,7 +23,7 @@ class TokenizeHelper
     t.next
   end
   def method_missing(name, *args)
-    if name =~ /^token(\d+)$/
+    if name.to_s =~ /^token(\d+)$/
       token($1.to_i-1)
     else
       first_token.send(name, *args)
