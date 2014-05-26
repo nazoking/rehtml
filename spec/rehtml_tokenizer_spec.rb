@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 require 'spec_helper'
 require 'rehtml/tokenizer'
 
@@ -66,6 +67,11 @@ describe tokenize(%{<!-- comment -->}) do
   its(:token_size){ should eq(1) }
   its(:first_token){ should be_a(REHTML::Comment) }
   its("first_token.string"){ should eq(" comment ") }
+end
+describe tokenize(%{abc &a; &amp; &amp &#x2212; &#39; }) do
+  its(:token_size){ should eq(1) }
+  its(:first_token){ should be_a(REHTML::Text) }
+  its(:value){ should eq(%[abc &a; & &amp − ' ]) }
 end
 describe tokenize(%{<![CDATA[ cdata ]]>}) do
   its(:token_size){ should eq(1) }

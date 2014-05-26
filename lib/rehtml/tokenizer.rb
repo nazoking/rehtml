@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 require 'strscan'
 require 'rehtml/elements'
+require 'rehtml/entities'
 
 module REHTML
   module ParseInfo
@@ -57,8 +58,21 @@ module REHTML
 
     # decode html entity
     def decode(html)
-      # TODO:
-      html
+      html.gsub(ENTITIES::REGEXP){
+        if $1 
+          if ENTITIES::MAP[$1]
+            ENTITIES::MAP[$1]
+          else
+            $&
+          end
+        elsif $2
+          [$2.to_i(10)].pack('U')
+        elsif $3
+          [$3.to_i(16)].pack('U')
+        else
+          $&
+        end
+      }
     end
 
     def scan_element
