@@ -1,151 +1,106 @@
 require 'spec_helper'
 require 'rehtml/tokenizer'
 
-describe REHTML::Tokenizer do
-  describe %[<a name="be evil" type='checkbox' value=yes disabled>] do
-    before(:each) do
-      @tokenizer =  REHTML::Tokenizer.new(%[<a name="be evil" type='checkbox' value=yes disabled>])
-    end
-    describe "first" do
-      subject(:first) { @tokenizer.next }
-      its(:raw){ should eq(%[<a name="be evil" type='checkbox' value=yes disabled>]) }
-      it{ should be_a(REHTML::Tag) }
-      its(:name){ should eq("a") }
-      its(:attributes){ should eq({
-        "type"=>"checkbox",
-        "name"=>"be evil",
-        "value"=>"yes",
-        "disabled"=>""}) }
-    end
-    describe "second" do
-      subject{ @tokenizer.next; @tokenizer.next }
-      it{ should be_nil }
+class TokenizeHelper
+  def initialize(msg,str=nil);
+    @msg = str.nil? ? "" : " #{msg}"
+    @str = str.nil? ? msg : str
+  end
+  def to_s; "tokenize#{@msg} {#{@str}}"; end
+  def first_token; REHTML::Tokenizer.new(@str).next; end
+  def token_size
+    t = REHTML::Tokenizer.new(@str)
+    i = 0
+    i += 1 until t.next.nil?
+    i
+  end
+  def token(num)
+    t = REHTML::Tokenizer.new(@str)
+    num.times{|ii|
+      token = t.next
+      raise "token size is #{ii}" if token.nil?
+    }
+    t.next
+  end
+  def method_missing(name, *args)
+    if name =~ /^token(\d+)$/
+      token($1.to_i-1)
+    else
+      first_token.send(name, *args)
     end
   end
-  describe %[a<b>c</b>d] do
-    before(:each) do
-      @tokenizer =  REHTML::Tokenizer.new(%[a<b>c</b>d])
-      @token1 = @tokenizer.next
-      @token2 = @tokenizer.next
-      @token3 = @tokenizer.next
-      @token4 = @tokenizer.next
-      @token5 = @tokenizer.next
-      @token6 = @tokenizer.next
-    end
-    context "token1" do
-      subject{ @token1 }
-      its(:raw){ should eq("a") }
-      it{ should be_a(REHTML::Text) }
-      its(:value){ should eq("a") }
-    end
-    context "token2" do
-      subject{ @token2 }
-      its(:raw){ should eq("<b>") }
-      it{ should be_a(REHTML::Tag) }
-      its(:name){ should eq("b") }
-      its("attributes.empty?"){ should be_true }
-    end
-    context "token3" do
-      subject{ @token3 }
-      it{ should be_a(REHTML::Text) }
-      its(:value){ should eq("c") }
-    end
-    context "token4" do
-      subject{ @token4 }
-      it{ should be_a(REHTML::EndTag) }
-      its(:name){ should eq("b") }
-    end
-    context "token5" do
-      subject{ @token5 }
-      it{ should be_a(REHTML::Text) }
-      its(:value){ should eq("d") }
-    end
-    context "token6" do
-      subject{ @token6 }
-      it{ should be_nil }
-    end
-  end
-  describe %[<?xml version="1.0"?><?php hoge?><? huga?>] do
-    before(:each) do
-      @tokenizer = REHTML::Tokenizer.new(%[<?xml version=1?><?php hoge?><? huga?>])
-      @token1 = @tokenizer.next
-      @token2 = @tokenizer.next
-      @token3 = @tokenizer.next
-    end
-    context "token1" do
-      subject{ @token1 }
-      it{ should be_a(REHTML::Instruction) }
-      its(:is_xml_decl?){ should be_true }
-    end
-    context "token2" do
-      subject{ @token2 }
-      it{ should be_a(REHTML::Instruction) }
-      its(:target){ should eq("php") }
-      its(:content){ should eq(" hoge") }
-    end
-    context "token3" do
-      subject{ @token3 }
-      it{ should be_a(REHTML::Instruction) }
-      its(:target){ should eq("") }
-      its(:content){ should eq(" huga") }
-    end
-  end
-  describe %{<!-- comment --><![CDATA[ cdata ]]>} do
-    before(:each) do
-      @tokenizer = REHTML::Tokenizer.new(%{<!-- comment --><![CDATA[ cdata ]]>})
-      @token1 = @tokenizer.next
-      @token2 = @tokenizer.next
-    end
-    context "token1" do
-      subject{ @token1 }
-      it{ should be_a(REHTML::Comment) }
-      its(:string){ should eq(" comment ") }
-    end
-    context "token2" do
-      subject{ @token2 }
-      it{ should be_a(REHTML::CData) }
-      its(:value){ should eq(" cdata ") }
-    end
-  end
-  describe %{unclosed comment <!-- comment } do
-    before(:each) do
-      @t = REHTML::Tokenizer.new(%{<!-- comment })
-      @t1 = @t.next
-      @t2 = @t.next
-    end
-    context "token1" do
-      subject{ @t1 }
-      it{ should be_a(REHTML::Comment) }
-      its(:string){ should eq(" comment ") }
-    end
-    it("token2 should be nil"){ @t2.should be_nil }
-  end
-  describe %{unclosed tag <A } do
-    before(:each) do
-      @t = REHTML::Tokenizer.new(%{<A })
-      @t1 = @t.next
-      @t2 = @t.next
-    end
-    context "token1" do
-      subject{ @t1 }
-      it{ should be_a(REHTML::Tag) }
-      its(:name){ should eq("a") }
-      its(:attributes){ should be_empty }
-    end
-    it("token2 should be nil"){ @t2.should be_nil }
-  end
-  describe %{bad <A =A=B ATTR x=">" hoge = ' huge} do
-    before(:each) do
-      @t = REHTML::Tokenizer.new(%{<A =A=B ATTR x=">" A =A=B hoge = ' huge})
-      @t1 = @t.next
-      @t2 = @t.next
-    end
-    context "token1" do
-      subject{ @t1 }
-      it{ should be_a(REHTML::Tag) }
-      its(:name){ should eq("a") }
-      its(:attributes){ should eq({"attr"=>"", "hoge"=>" huge", "a"=>"A=B","x"=>">"}) }
-    end
-    it("token2 should be nil"){ @t2.should be_nil }
-  end
+end
+def tokenize(msg,str=nil); TokenizeHelper.new(msg,str); end
+
+describe tokenize(%[<a name="be evil" type='checkbox' value=yes disabled>]) do
+  its("first_token.raw"){ should eq(%[<a name="be evil" type='checkbox' value=yes disabled>]) }
+  its("first_token"){ should be_a(REHTML::Tag) }
+  its(:name){ should eq("a") }
+  its(:attributes){ should eq({
+    "type"=>"checkbox",
+    "name"=>"be evil",
+    "value"=>"yes",
+    "disabled"=>""}) }
+  its(:token_size){ should eq(1) }
+end
+describe tokenize(%[<?xml version="1.0"?>]) do
+  its(:first_token){ should be_a(REHTML::Instruction) }
+  its(:first_token){ should be_is_xml_decl }
+  its(:token_size){ should eq(1) }
+end
+describe tokenize(%[<?php hoge?>]) do
+  its(:token_size){ should eq(1) }
+  its(:first_token){ should be_a(REHTML::Instruction) }
+  its(:target){ should eq("php") }
+  its(:content){ should eq(" hoge") }
+  it{ should_not be_is_xml_decl }
+end
+describe tokenize(%[<? huga?>]) do
+  its(:token_size){ should eq(1) }
+  its(:first_token){ should be_a(REHTML::Instruction) }
+  its(:target){ should eq("") }
+  its(:content){ should eq(" huga") }
+  it{ should_not be_is_xml_decl }
+end
+describe tokenize(%{<!-- comment -->}) do
+  its(:token_size){ should eq(1) }
+  its(:first_token){ should be_a(REHTML::Comment) }
+  its("first_token.string"){ should eq(" comment ") }
+end
+describe tokenize(%{<![CDATA[ cdata ]]>}) do
+  its(:token_size){ should eq(1) }
+  its(:first_token){ should be_a(REHTML::CData) }
+  its(:value){ should eq(" cdata ") }
+end
+describe tokenize("unclosed comment",%[<!-- comment]) do
+  its(:token_size){ should eq(1) }
+  its(:first_token){ should be_a(REHTML::Comment) }
+  its(:string){ should eq(" comment") }
+end
+describe tokenize("unclosed tag",%{<A }) do
+  its(:token_size){ should eq(1) }
+  its(:first_token){ should be_a(REHTML::Tag) }
+  its(:name){ should eq("a") }
+  its(:attributes){ should be_empty }
+end
+describe tokenize(%{<A =A=B ATTR x=">" A =A=B hoge = ' huge}) do
+  its(:first_token){ should be_a(REHTML::Tag) }
+  its(:name){ should eq("a") }
+  its(:attributes){ should eq({"attr"=>"", "hoge"=>" huge", "a"=>"A=B","x"=>">"}) }
+end
+describe tokenize(%[a<b>c</b>d]) do
+  its("token1.raw"){ should eq("a") }
+  its("token1"){ should be_a(REHTML::Text) }
+  its("token1.value"){ should eq("a") }
+  its("token2.raw"){ should eq("<b>") }
+  its("token2"){ should be_a(REHTML::Tag) }
+  its("token2.name"){ should eq("b") }
+  its("token2.attributes"){ should be_empty }
+  its("token3"){ should be_a(REHTML::Text) }
+  its("token3.value"){ should eq("c") }
+  its("token4"){ should be_a(REHTML::EndTag) }
+  its("token4.name"){ should eq("b") }
+  its("token5"){ should be_a(REHTML::Text) }
+  its("token5.value"){ should eq("d") }
+  its("token6"){ should be_nil }
 end
