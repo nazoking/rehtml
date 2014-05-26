@@ -2,15 +2,16 @@
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'rehtml/version'
+description = open(File.dirname(__FILE__)+"/README.md").read.gsub(/^.*\n(Pure Ruby)/m,'\1').gsub(/\n##.*/m,"")
 
 Gem::Specification.new do |spec|
   spec.name          = "rehtml"
   spec.version       = REHTML::VERSION
   spec.authors       = ["nazoking"]
   spec.email         = ["nazoking@gmail.com"]
-  spec.summary       = %q{Pure ruby html parser}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
-  spec.homepage      = ""
+  spec.summary       = description.split(/\n/)[0].strip
+  spec.description   = description
+  spec.homepage      = "https://github.com/nazoking/rehtml"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
