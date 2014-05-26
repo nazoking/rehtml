@@ -1,36 +1,18 @@
 # -*- encoding: utf-8 -*-
-require 'strscan'
+require 'rehtml/scanner'
 require 'rehtml/elements'
 require 'rehtml/entities'
 
 module REHTML
-  module ParseInfo
+  module TokenInfo
     attr_reader :raw, :start_pos, :end_pos
-    def set_pares_info(bpos,scanner)
+    def set_token_info(bpos,scanner)
       @start_pos=bpos
       @end_pos= scanner.pos
       @raw = scanner.string[@start_pos...(@end_pos)]
     end
   end
   class Tokenizer
-    class Scanner < StringScanner
-      def scan_before_or_eos(regex, move_after=false)
-        self.scan_before(regex, true, move_after)
-      end
-      def scan_before(regex, or_eos=false, move_after=false)
-        text = self.scan_until(regex)
-        if text
-          size = self.matched.size
-          self.pos -= size unless move_after
-          return text[0...(-size)]
-        end
-        if or_eos
-          text = self.rest
-          self.terminate
-        end
-        text
-      end
-    end
     # Create a new Tokenizer for the given text.
     def initialize(html)
       @scanner = Scanner.new(html)
@@ -46,8 +28,8 @@ module REHTML
 
     private
     def add_parse_info(node)
-      node.extend(ParseInfo)
-      node.set_pares_info(@bpos,@scanner)
+      node.extend(TokenInfo)
+      node.set_token_info(@bpos,@scanner)
       @bpos = @scanner.pos
       node
     end

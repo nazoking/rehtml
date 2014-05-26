@@ -1,8 +1,8 @@
 require 'spec_helper'
-require 'rehtml/tokenizer'
-describe REHTML::Tokenizer::Scanner do
+require 'rehtml/scanner'
+describe REHTML::Scanner do
   describe "scan aabcd" do
-    let(:scanner){ REHTML::Tokenizer::Scanner.new("aabcd") }
+    let(:scanner){ REHTML::Scanner.new("aabcd") }
     it "scan_before" do
       expect(scanner.scan_before(/b/)).to eq("aa")
       expect(scanner.check(/b/)).to eq("b")

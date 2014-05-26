@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'rehtml/parser'
+require 'rehtml'
 
 class ReHTML
   def initialize(str)

@@ -1,9 +1,12 @@
-require 'rexml/document'
-require "rehtml/version"
-require 'strscan'
+require 'rehtml/version'
+require 'rehtml/tokenizer'
+require 'rehtml/builder'
 
 module REHTML
-  def self.parse(html)
+  # convert html(string) to REXML::Document
+  def self.to_rexml(html)
+    builder = REXMLBuilder.new
+    builder.parse(Tokenizer.new(html))
+    builder.doc
   end
-  # Your code goes here...
 end

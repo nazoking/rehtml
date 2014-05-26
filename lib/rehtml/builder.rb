@@ -1,3 +1,5 @@
+require 'rexml/document'
+
 module REHTML
   class REXMLBuilder
     EMPTY_TAGS=Set.new %w[area base br col embed hr img input keygen link meta param source track wbr isindex basefont]
