@@ -67,7 +67,7 @@ module REHTML
         Comment.new(comment)
       elsif @scanner.scan(/<!\[CDATA\[/)
         CData.new(@scanner.scan_before_or_eos(/\]\]>/,true))
-      elsif @scanner.scan(/<!DOCTYPE[\x09\x0A\x0C\x0D]+/)
+      elsif @scanner.scan(/<!DOCTYPE[\x20\x09\x0A\x0C\x0D]+/i)
         scan_doctype
       elsif @scanner.scan(/<!/) # comment
         comment = @scanner.scan_before_or_eos(/>/,true)

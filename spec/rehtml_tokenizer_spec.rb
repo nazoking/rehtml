@@ -88,6 +88,16 @@ describe tokenize(%{<A =A=B ATTR x=">" A =A=B hoge = ' huge}) do
   its(:name){ should eq("a") }
   its(:attributes){ should eq({"attr"=>"", "hoge"=>" huge", "a"=>"A=B","x"=>">"}) }
 end
+describe tokenize(%{<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">}) do
+  its(:token_size){ should eq(1) }
+  its(:first_token){ should be_a(REHTML::DocType) }
+  its("token1.raw"){ should eq(%{<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">}) }
+end
+describe tokenize(%{<!BAD "//www.w3.org/TR/html4/loose.dtd">}) do
+  its(:token_size){ should eq(1) }
+  its(:first_token){ should be_a(REHTML::Comment) }
+  its(:string){ should eq('BAD "//www.w3.org/TR/html4/loose.dtd"') }
+end
 describe tokenize(%[a<b>c</b>d]) do
   its("token1.raw"){ should eq("a") }
   its("token1"){ should be_a(REHTML::Text) }
