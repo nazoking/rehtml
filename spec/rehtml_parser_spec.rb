@@ -6,7 +6,7 @@ class ReHTML
     @str = str
   end
   def to_s
-    @str
+    "parse [#{@str}]"
   end
   def to_rexml
     REHTML.to_rexml(@str).to_s
@@ -15,25 +15,25 @@ class ReHTML
     REHTML.to_rexml(@str)
   end
 end
-def ReHTML(str)
+def parse(str)
   ReHTML.new(str)
 end
 
-describe ReHTML(%[ <title>html</title> <a>a</a>]) do
+describe parse(%[ <title>html</title> <a>a</a>]) do
   its(:to_rexml){ should eq(%[ <html><title>html</title> <a>a</a></html>]) }
 end
-describe ReHTML(%[<a>html</a>]) do
+describe parse(%[<a>html</a>]) do
   its(:to_rexml){ should eq(%[<a>html</a>]) }
 end
-describe ReHTML(%[<title>html</title><a>a</a>]) do
+describe parse(%[<title>html</title><a>a</a>]) do
   its(:to_rexml){ should eq(%[<html><title>html</title><a>a</a></html>]) }
   its("doc.xml_decl.writethis"){ should be_false } 
 end
-describe ReHTML(%[  <?xml version="1.0" ?><html><a>a</a>]) do
+describe parse(%[  <?xml version="1.0" ?><html><a>a</a>]) do
   its(:to_rexml){ should eq(%[<?xml version='1.0'?>  <html><a>a</a></html>]) }
   its("doc.xml_decl.writethis"){ should be_true } 
 end
-describe ReHTML(%[<html><a />]) do
+describe parse(%[<html><a />]) do
   its(:to_rexml){ should eq(%[<html><a/></html>]) }
 end
 =begin
