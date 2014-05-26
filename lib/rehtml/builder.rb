@@ -1,6 +1,6 @@
 module REHTML
   class REXMLBuilder
-    EMPTY_TAGS=Set.new %w[br img hr meta input embed area base col keygen link param source isindex basefont]
+    EMPTY_TAGS=Set.new %w[area base br col embed hr img input keygen link meta param source track wbr isindex basefont]
     CDATA_TAGS=Set.new %w[script style textarea xmp title]
     attr_reader :doc
 
