@@ -1,5 +1,6 @@
 # REHTML
 
+[![Version](http://allthebadges.io/nazoking/rehtml/badge_fury.png)](http://allthebadges.io/nazoking/rehtml/badge_fury)
 [![Build Status](https://travis-ci.org/nazoking/rehtml.png?branch=master)](https://travis-ci.org/nazoking/rehtml)
 [![Coverage Status](https://coveralls.io/repos/nazoking/rehtml/badge.png?branch=master)](https://coveralls.io/r/nazoking/rehtml?branch=master)
 [![Code Climate](https://codeclimate.com/github/nazoking/rehtml.png)](https://codeclimate.com/github/nazoking/rehtml)
